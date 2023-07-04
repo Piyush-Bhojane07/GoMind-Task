@@ -1,0 +1,36 @@
+from flask import Flask, render_template, request
+from flask_sqlalchemy import SQLAlchemy
+
+app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///students.db'  # Replace with your own database URL
+db = SQLAlchemy(app)
+
+# Define a model for the Student table
+class Student(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100))
+    college = db.Column(db.String(100))
+
+    def __init__(self, name, college):
+        self.name = name
+        self.college = college
+
+@app.route('/', methods=['GET', 'POST'])
+def index():
+    if request.method == 'POST':
+        name = request.form['name']
+        college = request.form['college']
+
+        # Create a new student instance
+        student = Student(name, college)
+
+        # Add the student to the database
+        db.session.add(student)
+        db.session.commit()
+
+        return 'Student added successfully!'
+    
+    return render_template('index.html')
+
+if __name__ == '__main__':
+    app.run(debug=True)
